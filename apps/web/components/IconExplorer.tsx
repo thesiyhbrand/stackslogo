@@ -37,7 +37,7 @@ export default function IconExplorer({
       .trim()
       .toLowerCase();
 
-    return icons.filter((icon) => {
+    const results = icons.filter((icon) => {
       const matchesCategory =
         category === "all" ||
         icon.category === category;
@@ -51,24 +51,19 @@ export default function IconExplorer({
       }
 
       return (
-        icon.name
-          .toLowerCase()
-          .includes(query) ||
-        icon.slug
-          .toLowerCase()
-          .includes(query) ||
-        icon.aliases.some((alias) =>
-          alias
-            .toLowerCase()
-            .includes(query)
-        ) ||
-        icon.keywords.some((keyword) =>
-          keyword
-            .toLowerCase()
-            .includes(query)
-        )
+        getSearchScore(icon, query) > 0
       );
     });
+
+    if (!query) {
+      return results;
+    }
+
+    return [...results].sort(
+      (a, b) =>
+        getSearchScore(b, query) -
+        getSearchScore(a, query)
+    );
   }, [icons, search, category]);
 
   function isSelected(
@@ -77,6 +72,86 @@ export default function IconExplorer({
     return selected.some(
       (icon) => icon.slug === slug
     );
+  }
+
+  function getSearchScore(
+    icon: IconDefinition,
+    query: string
+  ): number {
+    const normalizedQuery =
+      query.trim().toLowerCase();
+
+    if (!normalizedQuery) {
+      return 0;
+    }
+
+    const name =
+      icon.name.toLowerCase();
+
+    const slug =
+      icon.slug.toLowerCase();
+
+    const aliases =
+      icon.aliases.map((item) =>
+        item.toLowerCase()
+      );
+
+    const keywords =
+      icon.keywords.map((item) =>
+        item.toLowerCase()
+      );
+
+    if (name === normalizedQuery) {
+      return 100;
+    }
+
+    if (slug === normalizedQuery) {
+      return 95;
+    }
+
+    if (aliases.includes(normalizedQuery)) {
+      return 90;
+    }
+
+    if (name.startsWith(normalizedQuery)) {
+      return 80;
+    }
+
+    if (slug.startsWith(normalizedQuery)) {
+      return 75;
+    }
+
+    if (
+      aliases.some((alias) =>
+        alias.startsWith(normalizedQuery)
+      )
+    ) {
+      return 70;
+    }
+
+    if (
+      keywords.some((keyword) =>
+        keyword === normalizedQuery
+      )
+    ) {
+      return 60;
+    }
+
+    if (
+      name.includes(normalizedQuery)
+    ) {
+      return 50;
+    }
+
+    if (
+      keywords.some((keyword) =>
+        keyword.includes(normalizedQuery)
+      )
+    ) {
+      return 40;
+    }
+
+    return 0;
   }
 
   return (
@@ -98,7 +173,7 @@ export default function IconExplorer({
         </div>
 
         <div className="explorer-count">
-          {selected.length} selected
+          {selected.length} / 50 selected
         </div>
       </div>
 
@@ -114,8 +189,24 @@ export default function IconExplorer({
         />
 
         <div className="category-tabs">
-          {categories.map(
-            (item) => (
+          {categories.map((item) => {
+            const count =
+              item === "all"
+                ? icons.length
+                : icons.filter(
+                  (icon) =>
+                    icon.category === item
+                ).length;
+
+            const label =
+              item === "all"
+                ? "All"
+                : item
+                  .charAt(0)
+                  .toUpperCase() +
+                item.slice(1);
+
+            return (
               <button
                 key={item}
                 type="button"
@@ -128,15 +219,13 @@ export default function IconExplorer({
                   setCategory(item)
                 }
               >
-                {item === "all"
-                  ? "All"
-                  : item
-                    .charAt(0)
-                    .toUpperCase() +
-                  item.slice(1)}
+                <span>{label} </span>
+                <span className="category-tab-count">
+                  {count}
+                </span>
               </button>
-            )
-          )}
+            );
+          })}
         </div>
       </div>
 

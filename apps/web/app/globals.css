@@ -1919,3 +1919,31 @@ a:focus-visible {
       repeat(2, minmax(0, 1fr));
   }
 }
+
+
+.category-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.category-tab-count {
+  min-width: 18px;
+  height: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: #f1f1f1;
+  color: #777;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.category-tab.active
+  .category-tab-count {
+  background: rgba(255, 255, 255, 0.18);
+  color: #fff;
+}

@@ -105,12 +105,25 @@ export default function BuilderApp({ icons }: BuilderAppProps) {
     window.history.replaceState(null, "", newUrl);
   }, [selected, settings, initialized]);
 
-  function toggleIcon(icon: IconDefinition) {
+  function toggleIcon(
+    icon: IconDefinition
+  ) {
     setSelected((current) => {
-      const exists = current.some((item) => item.slug === icon.slug);
+      const exists =
+        current.some(
+          (item) =>
+            item.slug === icon.slug
+        );
 
       if (exists) {
-        return current.filter((item) => item.slug !== icon.slug);
+        return current.filter(
+          (item) =>
+            item.slug !== icon.slug
+        );
+      }
+
+      if (current.length >= 50) {
+        return current;
       }
 
       return [...current, icon];
