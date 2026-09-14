@@ -9,6 +9,7 @@ import {
 
 import IconExplorer from "./IconExplorer";
 import StackBuilder from "./StackBuilder";
+import GitHubStackSync from "./GitHubStackSync";
 
 import { STACK_PRESETS } from "../lib/stack-presets";
 
@@ -180,8 +181,54 @@ export default function BuilderApp({ icons }: BuilderAppProps) {
     setSelected(presetIcons);
   }
 
+  function addDetectedToBuilder(
+    slugs: string[]
+  ) {
+    const detectedIcons =
+      slugs
+        .map((slug) =>
+          icons.find(
+            (icon) =>
+              icon.slug === slug
+          )
+        )
+        .filter(
+          (
+            icon
+          ): icon is IconDefinition =>
+            Boolean(icon)
+        );
+
+    setSelected((current) => {
+      const existing =
+        new Set(
+          current.map(
+            (icon) => icon.slug
+          )
+        );
+
+      const additions =
+        detectedIcons.filter(
+          (icon) =>
+            !existing.has(icon.slug)
+        );
+
+      return [
+        ...current,
+        ...additions,
+      ].slice(0, 50);
+    });
+  }
+
   return (
     <>
+      <GitHubStackSync
+        icons={icons}
+        onAddToBuilder={
+          addDetectedToBuilder
+        }
+      />
+      
       <IconExplorer icons={icons} selected={selected} onToggle={toggleIcon} onApplyPreset={applyPreset} />
 
       <StackBuilder
