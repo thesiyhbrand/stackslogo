@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { STACK_PRESETS } from "../lib/stack-presets";
 
 import type { IconDefinition } from "@devicons/icons";
 
@@ -8,6 +9,7 @@ interface IconExplorerProps {
   icons: IconDefinition[];
   selected: IconDefinition[];
   onToggle: (icon: IconDefinition) => void;
+  onApplyPreset?: (presetId: string) => void;
 }
 
 const categories = [
@@ -27,6 +29,7 @@ export default function IconExplorer({
   icons,
   selected,
   onToggle,
+  onApplyPreset,
 }: IconExplorerProps) {
   const [search, setSearch] = useState("");
   const [category, setCategory] =
@@ -226,6 +229,45 @@ export default function IconExplorer({
               </button>
             );
           })}
+        </div>
+      </div>
+
+      <div className="stack-presets">
+        <div className="stack-presets-header">
+          <div>
+            <p className="section-label">
+              QUICK START
+            </p>
+
+            <h3>
+              Start with a popular stack.
+            </h3>
+          </div>
+        </div>
+
+        <div className="stack-presets-grid">
+          {STACK_PRESETS.map((preset) => (
+            <button
+              key={preset.id}
+              type="button"
+              className="stack-preset"
+              onClick={() =>
+                onApplyPreset(preset.id)
+              }
+            >
+              <span className="stack-preset-name">
+                {preset.name}
+              </span>
+
+              <span className="stack-preset-description">
+                {preset.description}
+              </span>
+
+              <span className="stack-preset-action">
+                Use preset →
+              </span>
+            </button>
+          ))}
         </div>
       </div>
 
