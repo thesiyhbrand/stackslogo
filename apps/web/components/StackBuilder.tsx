@@ -33,6 +33,12 @@ export default function StackBuilder({
 
   const [shared, setShared] = useState(false);
 
+  const [copiedUrl, setCopiedUrl] =
+    useState(false);
+
+  const [copiedMarkdown, setCopiedMarkdown] =
+    useState(false);
+
   useEffect(() => {
     let cancelled = false;
 
@@ -81,10 +87,18 @@ export default function StackBuilder({
 
 
   const stackUrl =
-  createStackApiUrl(
-    selected,
-    settings
-  );
+    createStackApiUrl(
+      selected,
+      settings
+    );
+
+  const stackApiUrl =
+    createStackApiUrl(
+      selected,
+      settings
+    );
+
+  
 
   const origin = typeof window !== "undefined" ? window.location.origin : "";
 
@@ -113,15 +127,13 @@ export default function StackBuilder({
     }
   }
 
-
-
   async function shareStack() {
     const url =
-  createBuilderUrl(
-    selected,
-    settings,
-    window.location.origin
-  );
+      createBuilderUrl(
+        selected,
+        settings,
+        window.location.origin
+      );
 
     if (!url) {
       return;
@@ -164,6 +176,29 @@ export default function StackBuilder({
 
     URL.revokeObjectURL(url);
   }
+
+  function copyText(
+  value: string,
+  type: "url" | "markdown"
+) {
+  navigator.clipboard.writeText(value);
+
+  if (type === "url") {
+    setCopiedUrl(true);
+
+    window.setTimeout(() => {
+      setCopiedUrl(false);
+    }, 1500);
+  }
+
+  if (type === "markdown") {
+    setCopiedMarkdown(true);
+
+    window.setTimeout(() => {
+      setCopiedMarkdown(false);
+    }, 1500);
+  }
+}
 
   return (
     <section className="builder">
@@ -219,307 +254,313 @@ export default function StackBuilder({
         )}
       </div>
 
-    <div className="builder-workspace">
+      <div className="builder-workspace">
 
-  {/* STACK SETTINGS */}
+        {/* STACK SETTINGS */}
 
-  <div className="stack-settings">
+        <div className="stack-settings">
 
-    <div className="settings-header">
-      <div>
-        <p className="section-label">
-          STACK SETTINGS
-        </p>
+          <div className="settings-header">
+            <div>
+              <p className="section-label">
+                STACK SETTINGS
+              </p>
 
-        <h3>
-          Make it yours.
-        </h3>
+              <h3>
+                Make it yours.
+              </h3>
+            </div>
+          </div>
+
+          {/* THEME */}
+
+          <div className="setting-row">
+            <div className="setting-info">
+              <strong>Theme</strong>
+
+              <span>
+                Choose the icon theme.
+              </span>
+            </div>
+
+            <div className="setting-buttons">
+              <button
+                type="button"
+                className={
+                  settings.theme === "dark"
+                    ? "setting-button active"
+                    : "setting-button"
+                }
+                onClick={() =>
+                  onSettingsChange({
+                    theme: "dark",
+                  })
+                }
+              >
+                Dark
+              </button>
+
+              <button
+                type="button"
+                className={
+                  settings.theme === "light"
+                    ? "setting-button active"
+                    : "setting-button"
+                }
+                onClick={() =>
+                  onSettingsChange({
+                    theme: "light",
+                  })
+                }
+              >
+                Light
+              </button>
+            </div>
+          </div>
+
+          {/* SIZE */}
+
+          <div className="setting-row">
+            <div className="setting-info">
+              <strong>Size</strong>
+
+              <span>
+                Icon size in pixels.
+              </span>
+            </div>
+
+            <div className="range-control">
+              <input
+                type="range"
+                min="32"
+                max="128"
+                step="4"
+                value={settings.size}
+                onChange={(event) =>
+                  onSettingsChange({
+                    size: Number(event.target.value),
+                  })
+                }
+              />
+
+              <output>
+                {settings.size}px
+              </output>
+            </div>
+          </div>
+
+          {/* PER LINE */}
+
+          <div className="setting-row">
+            <div className="setting-info">
+              <strong>Per line</strong>
+
+              <span>
+                Number of icons per row.
+              </span>
+            </div>
+
+            <div className="range-control">
+              <input
+                type="range"
+                min="1"
+                max="10"
+                step="1"
+                value={settings.perline}
+                onChange={(event) =>
+                  onSettingsChange({
+                    perline: Number(event.target.value),
+                  })
+                }
+              />
+
+              <output>
+                {settings.perline}
+              </output>
+            </div>
+          </div>
+
+          {/* GAP */}
+
+          <div className="setting-row">
+            <div className="setting-info">
+              <strong>Gap</strong>
+
+              <span>
+                Space between icons.
+              </span>
+            </div>
+
+            <div className="range-control">
+              <input
+                type="range"
+                min="0"
+                max="40"
+                step="2"
+                value={settings.gap}
+                onChange={(event) =>
+                  onSettingsChange({
+                    gap: Number(event.target.value),
+                  })
+                }
+              />
+
+              <output>
+                {settings.gap}px
+              </output>
+            </div>
+          </div>
+
+          {/* STYLE */}
+
+          <div className="setting-row">
+            <div className="setting-info">
+              <strong>Style</strong>
+
+              <span>
+                Choose your stack appearance.
+              </span>
+            </div>
+
+            <select
+              value={settings.style}
+              onChange={(event) =>
+                onSettingsChange({
+                  style:
+                    event.target.value as StackSettings["style"],
+                })
+              }
+            >
+              <option value="minimal">
+                Minimal
+              </option>
+
+              <option value="glass">
+                Glass
+              </option>
+
+              <option value="neon">
+                Neon
+              </option>
+
+              <option value="monochrome">
+                Monochrome
+              </option>
+            </select>
+          </div>
+
+        </div>
+
+
+        {/* LIVE PREVIEW */}
+
+        <div className="live-preview">
+
+          <div className="preview-header">
+            <div>
+              <p className="section-label">
+                LIVE PREVIEW
+              </p>
+
+              <h3>
+                Your stack, rendered.
+              </h3>
+            </div>
+
+            <span className="preview-meta">
+              {settings.size}px /{" "}
+              {settings.perline} per line
+            </span>
+          </div>
+
+          <div className="preview-stage">
+            {selected.length === 0 ? (
+              <span className="preview-placeholder">
+                Your icons will appear here.
+              </span>
+            ) : generatedSvg ? (
+              <div
+                className="generated-svg"
+                dangerouslySetInnerHTML={{
+                  __html: generatedSvg,
+                }}
+              />
+            ) : (
+              <span className="preview-placeholder">
+                Generating your stack...
+              </span>
+            )}
+          </div>
+
+        </div>
+
       </div>
-    </div>
-
-    {/* THEME */}
-
-    <div className="setting-row">
-      <div className="setting-info">
-        <strong>Theme</strong>
-
-        <span>
-          Choose the icon theme.
-        </span>
-      </div>
-
-      <div className="setting-buttons">
-        <button
-          type="button"
-          className={
-            settings.theme === "dark"
-              ? "setting-button active"
-              : "setting-button"
-          }
-          onClick={() =>
-            onSettingsChange({
-              theme: "dark",
-            })
-          }
-        >
-          Dark
-        </button>
-
-        <button
-          type="button"
-          className={
-            settings.theme === "light"
-              ? "setting-button active"
-              : "setting-button"
-          }
-          onClick={() =>
-            onSettingsChange({
-              theme: "light",
-            })
-          }
-        >
-          Light
-        </button>
-      </div>
-    </div>
-
-    {/* SIZE */}
-
-    <div className="setting-row">
-      <div className="setting-info">
-        <strong>Size</strong>
-
-        <span>
-          Icon size in pixels.
-        </span>
-      </div>
-
-      <div className="range-control">
-        <input
-          type="range"
-          min="32"
-          max="128"
-          step="4"
-          value={settings.size}
-          onChange={(event) =>
-            onSettingsChange({
-              size: Number(event.target.value),
-            })
-          }
-        />
-
-        <output>
-          {settings.size}px
-        </output>
-      </div>
-    </div>
-
-    {/* PER LINE */}
-
-    <div className="setting-row">
-      <div className="setting-info">
-        <strong>Per line</strong>
-
-        <span>
-          Number of icons per row.
-        </span>
-      </div>
-
-      <div className="range-control">
-        <input
-          type="range"
-          min="1"
-          max="10"
-          step="1"
-          value={settings.perline}
-          onChange={(event) =>
-            onSettingsChange({
-              perline: Number(event.target.value),
-            })
-          }
-        />
-
-        <output>
-          {settings.perline}
-        </output>
-      </div>
-    </div>
-
-    {/* GAP */}
-
-    <div className="setting-row">
-      <div className="setting-info">
-        <strong>Gap</strong>
-
-        <span>
-          Space between icons.
-        </span>
-      </div>
-
-      <div className="range-control">
-        <input
-          type="range"
-          min="0"
-          max="40"
-          step="2"
-          value={settings.gap}
-          onChange={(event) =>
-            onSettingsChange({
-              gap: Number(event.target.value),
-            })
-          }
-        />
-
-        <output>
-          {settings.gap}px
-        </output>
-      </div>
-    </div>
-
-    {/* STYLE */}
-
-    <div className="setting-row">
-      <div className="setting-info">
-        <strong>Style</strong>
-
-        <span>
-          Choose your stack appearance.
-        </span>
-      </div>
-
-      <select
-        value={settings.style}
-        onChange={(event) =>
-          onSettingsChange({
-            style:
-              event.target.value as StackSettings["style"],
-          })
-        }
-      >
-        <option value="minimal">
-          Minimal
-        </option>
-
-        <option value="glass">
-          Glass
-        </option>
-
-        <option value="neon">
-          Neon
-        </option>
-
-        <option value="monochrome">
-          Monochrome
-        </option>
-      </select>
-    </div>
-
-  </div>
-
-
-  {/* LIVE PREVIEW */}
-
-  <div className="live-preview">
-
-    <div className="preview-header">
-      <div>
-        <p className="section-label">
-          LIVE PREVIEW
-        </p>
-
-        <h3>
-          Your stack, rendered.
-        </h3>
-      </div>
-
-      <span className="preview-meta">
-        {settings.size}px /{" "}
-        {settings.perline} per line
-      </span>
-    </div>
-
-    <div className="preview-stage">
-      {selected.length === 0 ? (
-        <span className="preview-placeholder">
-          Your icons will appear here.
-        </span>
-      ) : generatedSvg ? (
-        <div
-          className="generated-svg"
-          dangerouslySetInnerHTML={{
-            __html: generatedSvg,
-          }}
-        />
-      ) : (
-        <span className="preview-placeholder">
-          Generating your stack...
-        </span>
-      )}
-    </div>
-
-  </div>
-
-</div>
 
       {/* OUTPUT */}
 
       <div className="stack-output">
         <div className="output-header">
           <div>
-            <p className="section-label">OUTPUT</p>
+            <p className="section-label">
+              YOUR STACK URL
+            </p>
 
-            <h3>Ready to embed.</h3>
+            <h3>
+              One URL. Use it anywhere.
+            </h3>
+
+            <p className="section-description">
+              Embed your generated stack in your
+              README, portfolio, website, or docs.
+            </p>
           </div>
-
-          {selected.length > 0 && (
-            <button type="button" className="share-button" onClick={shareStack}>
-              {shared ? "Link Copied!" : "Share Stack"}
-            </button>
-          )}
         </div>
 
         {/* SVG URL */}
 
-        <div className="output-block">
-          <div className="output-label">
-            <span>SVG URL</span>
-
-            {fullStackUrl && (
-              <button
-                type="button"
-                className="copy-button"
-                onClick={() => copyToClipboard(fullStackUrl, "url")}
-              >
-                {copied === "url" ? "Copied!" : "Copy"}
-              </button>
-            )}
-          </div>
-
-          <code className="output-code">
-            {fullStackUrl || "Select icons to generate a URL."}
+        <div className="output-url">
+          <code>
+            {stackApiUrl}
           </code>
+
+          <button
+            type="button"
+            onClick={() =>
+              copyText(stackApiUrl, "url")
+            }
+          >
+            {copiedUrl
+              ? "Copied!"
+              : "Copy URL"}
+          </button>
         </div>
 
         {/* MARKDOWN */}
 
-        <div className="output-block">
-          <div className="output-label">
+        <div className="output-code-block">
+          <div className="output-code-header">
             <span>Markdown</span>
 
-            {markdown && (
-              <button
-                type="button"
-                className="copy-button"
-                onClick={() => copyToClipboard(markdown, "markdown")}
-              >
-                {copied === "markdown" ? "Copied!" : "Copy"}
-              </button>
-            )}
+            <button
+              type="button"
+              onClick={() =>
+                copyText(
+                  markdown,
+                  "markdown"
+                )
+              }
+            >
+              {copiedMarkdown
+                ? "Copied!"
+                : "Copy"}
+            </button>
           </div>
 
-          <code className="output-code">
-            {markdown || "Your Markdown embed will appear here."}
-          </code>
+          <pre>
+            <code>
+              {markdown}
+            </code>
+          </pre>
         </div>
 
         {/* RAW SVG */}
@@ -554,6 +595,53 @@ export default function StackBuilder({
           <code className="output-code">
             {generatedSvg || "Your raw SVG will appear here."}
           </code>
+        </div>
+
+        <div className="output-tips">
+          <div className="output-tip">
+            <span>01</span>
+
+            <div>
+              <strong>
+                Copy the URL
+              </strong>
+
+              <p>
+                Your stack is encoded into one
+                shareable URL.
+              </p>
+            </div>
+          </div>
+
+          <div className="output-tip">
+            <span>02</span>
+
+            <div>
+              <strong>
+                Add it anywhere
+              </strong>
+
+              <p>
+                Use it in GitHub, your portfolio,
+                website, or documentation.
+              </p>
+            </div>
+          </div>
+
+          <div className="output-tip">
+            <span>03</span>
+
+            <div>
+              <strong>
+                Change your stack
+              </strong>
+
+              <p>
+                Update your builder and the URL
+                updates automatically.
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </section>

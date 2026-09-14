@@ -10,6 +10,8 @@ import {
 import IconExplorer from "./IconExplorer";
 import StackBuilder from "./StackBuilder";
 
+import { STACK_PRESETS } from "../lib/stack-presets";
+
 interface BuilderAppProps {
   icons: IconDefinition[];
 }
@@ -148,9 +150,39 @@ export default function BuilderApp({ icons }: BuilderAppProps) {
     window.history.replaceState(null, "", window.location.pathname);
   }
 
+  function applyPreset(
+    presetId: string
+  ) {
+    const preset =
+      STACK_PRESETS.find(
+        (item) => item.id === presetId
+      );
+
+    if (!preset) {
+      return;
+    }
+
+    const presetIcons =
+      preset.icons
+        .map((slug) =>
+          icons.find(
+            (icon) =>
+              icon.slug === slug
+          )
+        )
+        .filter(
+          (
+            icon
+          ): icon is IconDefinition =>
+            Boolean(icon)
+        );
+
+    setSelected(presetIcons);
+  }
+
   return (
     <>
-      <IconExplorer icons={icons} selected={selected} onToggle={toggleIcon} />
+      <IconExplorer icons={icons} selected={selected} onToggle={toggleIcon} onApplyPreset={applyPreset} />
 
       <StackBuilder
         selected={selected}
