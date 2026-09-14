@@ -1,7 +1,10 @@
 import { getIcons } from "@devicons/icons";
+
 import {
   generateSvgFromIcons,
 } from "@devicons/svg-generator";
+
+const MAX_ICONS = 50;
 
 export async function GET(
   request: Request
@@ -10,58 +13,138 @@ export async function GET(
     const { searchParams } =
       new URL(request.url);
 
+    /*
+     * ICONS
+     */
+
     const iconQuery =
       searchParams.get("i");
 
     if (!iconQuery) {
-      return new Response(
+      return errorResponse(
         "Missing icons. Example: ?i=html,css,javascript",
-        {
-          status: 400,
-          headers: {
-            "Content-Type": "text/plain",
-          },
-        }
+        400
       );
     }
 
     const requestedIcons =
       iconQuery
         .split(",")
-        .map((item) => item.trim())
+        .map((item) =>
+          item.trim().toLowerCase()
+        )
         .filter(Boolean);
+
+    if (
+      requestedIcons.length === 0
+    ) {
+      return errorResponse(
+        "At least one icon is required.",
+        400
+      );
+    }
+
+    if (
+      requestedIcons.length >
+      MAX_ICONS
+    ) {
+      return errorResponse(
+        `Maximum ${MAX_ICONS} icons are allowed.`,
+        400
+      );
+    }
+
+    /*
+     * RESOLVE ICONS
+     */
 
     const selectedIcons =
       getIcons(requestedIcons);
 
-    if (selectedIcons.length === 0) {
-      return new Response(
+    if (
+      selectedIcons.length === 0
+    ) {
+      return errorResponse(
         "No valid icons found.",
-        {
-          status: 400,
-          headers: {
-            "Content-Type": "text/plain",
-          },
-        }
+        400
       );
     }
 
+    /*
+     * THEME
+     */
+
+    const themeParam =
+      searchParams.get("theme");
+
     const theme =
-      searchParams.get("theme") === "light"
+      themeParam === "light"
         ? "light"
         : "dark";
 
-    const size = Number(
-      searchParams.get("size") || 64
-    );
+    /*
+     * SIZE
+     */
 
-    const perline = Number(
-      searchParams.get("perline") || 5
-    );
+    const size =
+      parseNumber(
+        searchParams.get("size"),
+        64
+      );
 
-    const gap = Number(
-      searchParams.get("gap") || 12
-    );
+    if (
+      size < 16 ||
+      size > 512
+    ) {
+      return errorResponse(
+        "size must be between 16 and 512.",
+        400
+      );
+    }
+
+    /*
+     * PER LINE
+     */
+
+    const perline =
+      parseNumber(
+        searchParams.get("perline"),
+        5
+      );
+
+    if (
+      perline < 1 ||
+      perline > 50
+    ) {
+      return errorResponse(
+        "perline must be between 1 and 50.",
+        400
+      );
+    }
+
+    /*
+     * GAP
+     */
+
+    const gap =
+      parseNumber(
+        searchParams.get("gap"),
+        12
+      );
+
+    if (
+      gap < 0 ||
+      gap > 128
+    ) {
+      return errorResponse(
+        "gap must be between 0 and 128.",
+        400
+      );
+    }
+
+    /*
+     * STYLE
+     */
 
     const styleParam =
       searchParams.get("style");
@@ -73,40 +156,96 @@ export async function GET(
         ? styleParam
         : "minimal";
 
-    const url = new URL(request.url);
+    /*
+     * GENERATE SVG
+     */
+
+    const url =
+      new URL(request.url);
 
     const svg =
-  await generateSvgFromIcons(
-    {
-      icons: selectedIcons,
-      theme,
-      size,
-      perline,
-      gap,
-      style,
-    },
-    url.origin
-  );
+      await generateSvgFromIcons(
+        {
+          icons: selectedIcons,
+          theme,
+          size,
+          perline,
+          gap,
+          style,
+        },
+        url.origin
+      );
+
+    /*
+     * RESPONSE
+     */
 
     return new Response(svg, {
       status: 200,
+
       headers: {
-        "Content-Type": "image/svg+xml",
+        "Content-Type":
+          "image/svg+xml; charset=utf-8",
+
         "Cache-Control":
           "public, max-age=31536000, immutable",
+
+        "X-Content-Type-Options":
+          "nosniff",
       },
     });
   } catch (error) {
-    console.error(error);
+    console.error(
+      "SVG generation failed:",
+      error
+    );
 
-    return new Response(
+    return errorResponse(
       "Failed to generate SVG.",
-      {
-        status: 500,
-        headers: {
-          "Content-Type": "text/plain",
-        },
-      }
+      500
     );
   }
+}
+
+
+/*
+ * HELPERS
+ */
+
+function parseNumber(
+  value: string | null,
+  fallback: number
+): number {
+  if (value === null) {
+    return fallback;
+  }
+
+  const parsed =
+    Number(value);
+
+  return Number.isFinite(parsed)
+    ? parsed
+    : fallback;
+}
+
+function errorResponse(
+  message: string,
+  status: number
+): Response {
+  return new Response(
+    message,
+    {
+      status,
+      headers: {
+        "Content-Type":
+          "text/plain; charset=utf-8",
+
+        "Cache-Control":
+          "no-store",
+
+        "X-Content-Type-Options":
+          "nosniff",
+      },
+    }
+  );
 }

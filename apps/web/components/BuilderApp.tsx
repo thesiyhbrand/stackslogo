@@ -3,6 +3,9 @@
 import { useEffect, useState } from "react";
 
 import type { IconDefinition } from "@devicons/icons";
+import {
+  createStackQuery,
+} from "../lib/stack-url";
 
 import IconExplorer from "./IconExplorer";
 import StackBuilder from "./StackBuilder";
@@ -42,51 +45,31 @@ export default function BuilderApp({ icons }: BuilderAppProps) {
    * Restore stack configuration from URL.
    */
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-
-    const iconQuery = params.get("i");
-
-    if (iconQuery) {
-      const slugs = iconQuery
-        .split(",")
-        .map((item) => item.trim())
-        .filter(Boolean);
-
-      const urlIcons = slugs
-        .map((slug) => icons.find((icon) => icon.slug === slug))
-        .filter((icon): icon is IconDefinition => Boolean(icon));
-
-      setSelected(urlIcons);
+    if (!initialized) {
+      return;
     }
 
-    const theme = params.get("theme");
+    const query =
+      createStackQuery(
+        selected,
+        settings
+      );
 
-    const size = Number(params.get("size"));
+    const newUrl =
+      query
+        ? `${window.location.pathname}?${query}`
+        : window.location.pathname;
 
-    const perline = Number(params.get("perline"));
-
-    const gap = Number(params.get("gap"));
-
-    const style = params.get("style");
-
-    setSettings({
-      theme: theme === "light" ? "light" : defaultSettings.theme,
-
-      size: size >= 32 && size <= 128 ? size : defaultSettings.size,
-
-      perline:
-        perline >= 1 && perline <= 10 ? perline : defaultSettings.perline,
-
-      gap: gap >= 0 && gap <= 40 ? gap : defaultSettings.gap,
-
-      style:
-        style === "glass" || style === "neon" || style === "monochrome"
-          ? style
-          : defaultSettings.style,
-    });
-
-    setInitialized(true);
-  }, [icons]);
+    window.history.replaceState(
+      null,
+      "",
+      newUrl
+    );
+  }, [
+    selected,
+    settings,
+    initialized,
+  ]);
 
   /*
    * Keep the browser URL synchronized

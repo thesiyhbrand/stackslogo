@@ -49,6 +49,39 @@ export function generateSvg(
   viewBox="0 0 ${width} ${height}"
   role="img"
 >
+    <defs>
+
+    <filter
+      id="neon-glow"
+      x="-100%"
+      y="-100%"
+      width="300%"
+      height="300%"
+    >
+      <feGaussianBlur
+        stdDeviation="3"
+        result="blur"
+      />
+
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+
+    <filter id="monochrome">
+      <feColorMatrix
+        type="matrix"
+        values="
+          0.33 0.33 0.33 0 0
+          0.33 0.33 0.33 0 0
+          0.33 0.33 0.33 0 0
+          0    0    0    1 0
+        "
+      />
+    </filter>
+
+  </defs>
   <rect
     width="100%"
     height="100%"

@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+
 import type { IconDefinition } from "@devicons/icons";
 
 interface IconExplorerProps {
@@ -10,15 +11,17 @@ interface IconExplorerProps {
 }
 
 const categories = [
-  { label: "All", value: "all" },
-  { label: "Languages", value: "language" },
-  { label: "Frontend", value: "frontend" },
-  { label: "Backend", value: "backend" },
-  { label: "Database", value: "database" },
-  { label: "DevOps", value: "devops" },
-  { label: "Tools", value: "tool" },
-  { label: "Creative", value: "creative" },
-];
+  "all",
+  "language",
+  "frontend",
+  "backend",
+  "database",
+  "devops",
+  "tool",
+  "creative",
+] as const;
+
+type Category = (typeof categories)[number];
 
 export default function IconExplorer({
   icons,
@@ -26,137 +29,170 @@ export default function IconExplorer({
   onToggle,
 }: IconExplorerProps) {
   const [search, setSearch] = useState("");
-  const [category, setCategory] = useState("all");
+  const [category, setCategory] =
+    useState<Category>("all");
 
   const filteredIcons = useMemo(() => {
-    const query = search.toLowerCase().trim();
+    const query = search
+      .trim()
+      .toLowerCase();
 
     return icons.filter((icon) => {
       const matchesCategory =
         category === "all" ||
         icon.category === category;
 
-      const matchesSearch =
-        !query ||
-        icon.name.toLowerCase().includes(query) ||
-        icon.slug.toLowerCase().includes(query) ||
-        icon.aliases.some((alias) =>
-          alias.toLowerCase().includes(query)
-        );
+      if (!matchesCategory) {
+        return false;
+      }
+
+      if (!query) {
+        return true;
+      }
 
       return (
-        matchesCategory &&
-        matchesSearch
+        icon.name
+          .toLowerCase()
+          .includes(query) ||
+        icon.slug
+          .toLowerCase()
+          .includes(query) ||
+        icon.aliases.some((alias) =>
+          alias
+            .toLowerCase()
+            .includes(query)
+        ) ||
+        icon.keywords.some((keyword) =>
+          keyword
+            .toLowerCase()
+            .includes(query)
+        )
       );
     });
   }, [icons, search, category]);
 
+  function isSelected(
+    slug: string
+  ) {
+    return selected.some(
+      (icon) => icon.slug === slug
+    );
+  }
+
   return (
-    <section className="explorer">
+    <section className="icon-explorer">
       <div className="explorer-header">
         <div>
           <p className="section-label">
             ICON EXPLORER
           </p>
 
-          <h2>Find your stack.</h2>
+          <h2>
+            Choose your stack.
+          </h2>
 
           <p className="section-description">
-            Search through the DevIcons collection
-            and build your stack.
+            Search and select the technologies
+            you want to showcase.
           </p>
         </div>
 
-        <div className="icon-count">
-          {filteredIcons.length}
-          <span> icons</span>
+        <div className="explorer-count">
+          {selected.length} selected
         </div>
       </div>
 
       <div className="explorer-controls">
         <input
           type="search"
-          placeholder="Search icons..."
           value={search}
           onChange={(event) =>
             setSearch(event.target.value)
           }
+          placeholder="Search technologies..."
+          aria-label="Search technologies"
         />
 
-        <div className="category-list">
-          {categories.map((item) => (
-            <button
-              key={item.value}
-              className={
-                category === item.value
-                  ? "category active"
-                  : "category"
-              }
-              onClick={() =>
-                setCategory(item.value)
-              }
-            >
-              {item.label}
-            </button>
-          ))}
+        <div className="category-tabs">
+          {categories.map(
+            (item) => (
+              <button
+                key={item}
+                type="button"
+                className={
+                  category === item
+                    ? "category-tab active"
+                    : "category-tab"
+                }
+                onClick={() =>
+                  setCategory(item)
+                }
+              >
+                {item === "all"
+                  ? "All"
+                  : item
+                    .charAt(0)
+                    .toUpperCase() +
+                  item.slice(1)}
+              </button>
+            )
+          )}
         </div>
       </div>
 
       <div className="icon-grid">
-        {filteredIcons.map((icon) => {
-          const isSelected = selected.some(
-            (item) =>
-              item.slug === icon.slug
-          );
+        {filteredIcons.length === 0 ? (
+          <div className="explorer-empty">
+            <strong>
+              No technologies found.
+            </strong>
 
-          return (
-            <button
-              className={
-                isSelected
-                  ? "icon-card selected"
-                  : "icon-card"
-              }
-              key={icon.slug}
-              onClick={() =>
-                onToggle(icon)
-              }
-            >
-              <div className="icon-preview">
-                <img
-                  src={icon.svg.dark}
-                  alt={icon.name}
-                />
-              </div>
+            <span>
+              Try a different search or category.
+            </span>
+          </div>
+        ) : (
+          filteredIcons.map(
+            (icon) => {
+              const active =
+                isSelected(
+                  icon.slug
+                );
 
-              <div className="icon-info">
-                <strong>
-                  {icon.name}
-                </strong>
+              return (
+                <button
+                  key={icon.slug}
+                  type="button"
+                  className={
+                    active
+                      ? "icon-card selected"
+                      : "icon-card"
+                  }
+                  onClick={() => onToggle(icon)}
+                  aria-pressed={active}
+                >
+                  <div className="icon-card-image">
+                    <img
+                      src={icon.svg.dark}
+                      alt=""
+                    />
+                  </div>
 
-                <span>
-                  {icon.category}
-                </span>
-              </div>
+                  <span className="icon-card-name">
+                    {icon.name}
+                  </span>
 
-              {isSelected && (
-                <div className="icon-selected">
-                  ✓ Selected
-                </div>
-              )}
-            </button>
-          );
-        })}
+                  {active && (
+                    <span className="icon-card-status">
+                      Selected
+                    </span>
+                  )}
+                </button>
+              );
+            }
+          )
+        )}
       </div>
-
-      {filteredIcons.length === 0 && (
-        <div className="empty-state">
-          <p>No icons found.</p>
-
-          <span>
-            Try another search.
-          </span>
-        </div>
-      )}
     </section>
   );
 }

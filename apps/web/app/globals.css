@@ -374,26 +374,30 @@ img {
 .icon-card {
   position: relative;
 
+  min-height: 132px;
+
   display: flex;
   flex-direction: column;
+  align-items: center;
+  justify-content: center;
 
-  min-height: 180px;
+  gap: 10px;
 
-  padding: 18px;
+  padding: 18px 12px;
 
-  border: 1px solid #e5e5e5;
+  border: 1px solid #e3e3e3;
   border-radius: 12px;
 
-  background: #ffffff;
-  color: #111111;
+  background: #fff;
+  color: #111;
 
-  text-align: left;
+  cursor: pointer;
 
   transition:
-    transform 0.2s ease,
-    border-color 0.2s ease,
-    background 0.2s ease,
-    box-shadow 0.2s ease;
+    border-color 0.15s ease,
+    background 0.15s ease,
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
 }
 
 .icon-card:hover {
@@ -408,9 +412,10 @@ img {
 }
 
 .icon-card.selected {
-  border-color: #111111;
-
+  border-color: #111;
   background: #fafafa;
+  box-shadow:
+    0 0 0 1px #111;
 }
 
 .icon-card.selected:hover {
@@ -1688,4 +1693,229 @@ a:focus-visible {
 
 .selected-icon span {
   white-space: nowrap;
+}
+
+
+/* =========================================
+   ICON EXPLORER
+========================================= */
+
+.icon-explorer {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto 64px;
+  box-sizing: border-box;
+}
+
+.explorer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.explorer-count {
+  white-space: nowrap;
+  font-size: 13px;
+  color: #666;
+}
+
+.explorer-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.explorer-controls input {
+  width: 100%;
+  height: 48px;
+  padding: 0 16px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  background: #fff;
+  color: #111;
+  font: inherit;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.explorer-controls input:focus {
+  border-color: #111;
+}
+
+.category-tabs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.category-tab {
+  border: 1px solid #ddd;
+  background: #fff;
+  color: #555;
+  padding: 8px 14px;
+  border-radius: 999px;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.category-tab:hover {
+  border-color: #aaa;
+  color: #111;
+}
+
+.category-tab.active {
+  background: #111;
+  border-color: #111;
+  color: #fff;
+}
+
+
+/* =========================================
+   ICON GRID
+========================================= */
+
+.icon-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(
+      auto-fill,
+      minmax(120px, 1fr)
+    );
+  gap: 12px;
+}
+
+.icon-card {
+  position: relative;
+
+  min-height: 120px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  gap: 10px;
+
+  padding: 18px 12px;
+
+  border: 1px solid #e3e3e3;
+  border-radius: 12px;
+
+  background: #fff;
+  color: #111;
+
+  cursor: pointer;
+
+  transition:
+    border-color 0.15s ease,
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.icon-card:hover {
+  border-color: #bbb;
+  transform: translateY(-1px);
+  box-shadow:
+    0 4px 14px rgba(0, 0, 0, 0.06);
+}
+
+.icon-card.selected {
+  border-color: #111;
+  box-shadow:
+    0 0 0 1px #111;
+}
+
+.icon-card:focus-visible {
+  outline: 2px solid #111;
+  outline-offset: 3px;
+}
+
+.icon-card-image {
+  width: 48px;
+  height: 48px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon-card-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.icon-card-name {
+  font-size: 13px;
+  font-weight: 500;
+  text-align: center;
+}
+
+.icon-card-status {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+
+  padding: 4px 7px;
+
+  border-radius: 999px;
+
+  background: #111;
+  color: #fff;
+
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+
+/* =========================================
+   EMPTY STATE
+========================================= */
+
+.explorer-empty {
+  grid-column: 1 / -1;
+
+  min-height: 160px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  gap: 6px;
+
+  border: 1px dashed #d5d5d5;
+  border-radius: 12px;
+
+  color: #666;
+}
+
+.explorer-empty strong {
+  color: #111;
+}
+
+
+/* =========================================
+   MOBILE
+========================================= */
+
+@media (max-width: 640px) {
+  .explorer-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .icon-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
 }

@@ -8,9 +8,11 @@
     "build": "turbo build",
     "lint": "turbo lint",
     "typecheck": "turbo typecheck",
-    "validate:icons": "pnpm --filter @devicons/icons validate"
+    "validate:icons": "pnpm --filter @devicons/icons validate",
+    "validate:assets": "tsx scripts/validate-icons.ts"
   },
   "devDependencies": {
+    "tsx": "^4.23.13",
     "turbo": "latest",
     "typescript": "latest"
   }

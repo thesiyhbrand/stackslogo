@@ -5,6 +5,10 @@ import { useEffect, useState } from "react";
 import type { IconDefinition } from "@devicons/icons";
 
 import { generateSvgFromIcons } from "@devicons/svg-generator";
+import {
+  createBuilderUrl,
+  createStackApiUrl,
+} from "../lib/stack-url";
 
 import type { StackSettings } from "./BuilderApp";
 
@@ -74,29 +78,13 @@ export default function StackBuilder({
     settings.style,
   ]);
 
-  function getStackUrl() {
-    if (selected.length === 0) {
-      return "";
-    }
 
-    const params = new URLSearchParams({
-      i: selected.map((icon) => icon.slug).join(","),
 
-      theme: settings.theme,
-
-      size: String(settings.size),
-
-      perline: String(settings.perline),
-
-      gap: String(settings.gap),
-
-      style: settings.style,
-    });
-
-    return `/api/stack?${params.toString()}`;
-  }
-
-  const stackUrl = getStackUrl();
+  const stackUrl =
+  createStackApiUrl(
+    selected,
+    settings
+  );
 
   const origin = typeof window !== "undefined" ? window.location.origin : "";
 
@@ -125,30 +113,15 @@ export default function StackBuilder({
     }
   }
 
-  function getBuilderUrl() {
-    if (selected.length === 0) {
-      return "";
-    }
 
-    const params = new URLSearchParams({
-      i: selected.map((icon) => icon.slug).join(","),
-
-      theme: settings.theme,
-
-      size: String(settings.size),
-
-      perline: String(settings.perline),
-
-      gap: String(settings.gap),
-
-      style: settings.style,
-    });
-
-    return `${window.location.origin}/?${params.toString()}`;
-  }
 
   async function shareStack() {
-    const url = getBuilderUrl();
+    const url =
+  createBuilderUrl(
+    selected,
+    settings,
+    window.location.origin
+  );
 
     if (!url) {
       return;

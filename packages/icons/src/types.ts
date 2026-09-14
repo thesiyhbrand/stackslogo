@@ -10,8 +10,15 @@ export type IconCategory =
 export interface IconDefinition {
   slug: string;
   name: string;
+
   aliases: string[];
+
   category: IconCategory;
+
+  keywords: string[];
+
+  homepage?: string;
+
   svg: {
     dark: string;
     light: string;
