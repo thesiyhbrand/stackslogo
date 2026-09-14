@@ -1,0 +1,168 @@
+"use client";
+
+import { useEffect, useState } from "react";
+
+import type { IconDefinition } from "@devicons/icons";
+
+import IconExplorer from "./IconExplorer";
+import StackBuilder from "./StackBuilder";
+
+interface BuilderAppProps {
+  icons: IconDefinition[];
+}
+
+export type Theme = "dark" | "light";
+
+export type StackStyle = "minimal" | "glass" | "neon" | "monochrome";
+
+export interface StackSettings {
+  theme: Theme;
+  size: number;
+  perline: number;
+  gap: number;
+  style: StackStyle;
+}
+
+const defaultSettings: StackSettings = {
+  theme: "dark",
+  size: 64,
+  perline: 5,
+  gap: 12,
+  style: "minimal",
+};
+
+export default function BuilderApp({ icons }: BuilderAppProps) {
+  const [selected, setSelected] = useState<IconDefinition[]>([]);
+
+  const [settings, setSettings] = useState<StackSettings>(defaultSettings);
+
+  const [initialized, setInitialized] = useState(false);
+
+  /*
+   * Restore stack configuration from URL.
+   */
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+
+    const iconQuery = params.get("i");
+
+    if (iconQuery) {
+      const slugs = iconQuery
+        .split(",")
+        .map((item) => item.trim())
+        .filter(Boolean);
+
+      const urlIcons = slugs
+        .map((slug) => icons.find((icon) => icon.slug === slug))
+        .filter((icon): icon is IconDefinition => Boolean(icon));
+
+      setSelected(urlIcons);
+    }
+
+    const theme = params.get("theme");
+
+    const size = Number(params.get("size"));
+
+    const perline = Number(params.get("perline"));
+
+    const gap = Number(params.get("gap"));
+
+    const style = params.get("style");
+
+    setSettings({
+      theme: theme === "light" ? "light" : defaultSettings.theme,
+
+      size: size >= 32 && size <= 128 ? size : defaultSettings.size,
+
+      perline:
+        perline >= 1 && perline <= 10 ? perline : defaultSettings.perline,
+
+      gap: gap >= 0 && gap <= 40 ? gap : defaultSettings.gap,
+
+      style:
+        style === "glass" || style === "neon" || style === "monochrome"
+          ? style
+          : defaultSettings.style,
+    });
+
+    setInitialized(true);
+  }, [icons]);
+
+  /*
+   * Keep the browser URL synchronized
+   * with the current stack configuration.
+   */
+  useEffect(() => {
+    if (!initialized) {
+      return;
+    }
+
+    const params = new URLSearchParams();
+
+    if (selected.length > 0) {
+      params.set("i", selected.map((icon) => icon.slug).join(","));
+
+      params.set("theme", settings.theme);
+
+      params.set("size", String(settings.size));
+
+      params.set("perline", String(settings.perline));
+
+      params.set("gap", String(settings.gap));
+
+      params.set("style", settings.style);
+    }
+
+    const query = params.toString();
+
+    const newUrl = query
+      ? `${window.location.pathname}?${query}`
+      : window.location.pathname;
+
+    window.history.replaceState(null, "", newUrl);
+  }, [selected, settings, initialized]);
+
+  function toggleIcon(icon: IconDefinition) {
+    setSelected((current) => {
+      const exists = current.some((item) => item.slug === icon.slug);
+
+      if (exists) {
+        return current.filter((item) => item.slug !== icon.slug);
+      }
+
+      return [...current, icon];
+    });
+  }
+
+  function removeIcon(slug: string) {
+    setSelected((current) => current.filter((icon) => icon.slug !== slug));
+  }
+
+  function updateSettings(updates: Partial<StackSettings>) {
+    setSettings((current) => ({
+      ...current,
+      ...updates,
+    }));
+  }
+
+  function clearStack() {
+    setSelected([]);
+    setSettings(defaultSettings);
+
+    window.history.replaceState(null, "", window.location.pathname);
+  }
+
+  return (
+    <>
+      <IconExplorer icons={icons} selected={selected} onToggle={toggleIcon} />
+
+      <StackBuilder
+        selected={selected}
+        onRemove={removeIcon}
+        settings={settings}
+        onSettingsChange={updateSettings}
+        onClear={clearStack}
+      />
+    </>
+  );
+}
