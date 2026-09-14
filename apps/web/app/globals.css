@@ -2154,3 +2154,213 @@ a:focus-visible {
     grid-template-columns: 1fr;
   }
 }
+
+.github-sync {
+  width: 100%;
+  max-width: 1080px;
+  margin: 0 auto 56px;
+  padding: 28px;
+  box-sizing: border-box;
+  border: 1px solid #ddd;
+  border-radius: 16px;
+  background: #fafafa;
+}
+
+.github-sync-header {
+  margin-bottom: 20px;
+}
+
+.github-sync-header h2 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.github-sync-form {
+  display: flex;
+  gap: 10px;
+}
+
+.github-sync-form input {
+  flex: 1;
+  min-width: 0;
+  height: 48px;
+  padding: 0 15px;
+  border: 1px solid #ddd;
+  border-radius: 9px;
+  background: #fff;
+  color: #111;
+  font: inherit;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.github-sync-form input:focus {
+  border-color: #111;
+}
+
+.github-sync-form button,
+.github-sync-add {
+  height: 48px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 9px;
+  background: #111;
+  color: #fff;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.github-sync-form button:disabled {
+  opacity: 0.5;
+  cursor: wait;
+}
+
+.github-sync-error {
+  margin-top: 12px;
+  padding: 12px 14px;
+  border: 1px solid #e2caca;
+  border-radius: 9px;
+  background: #fff;
+  color: #a33;
+  font-size: 13px;
+}
+
+.github-sync-result {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #e3e3e3;
+}
+
+.github-sync-result-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.github-sync-repo {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.github-sync-detected-label {
+  display: block;
+  margin-top: 4px;
+  color: #777;
+  font-size: 12px;
+}
+
+.github-sync-add {
+  height: 40px;
+  white-space: nowrap;
+}
+
+.github-sync-tech-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.github-sync-tech {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid #e3e3e3;
+  border-radius: 10px;
+  background: #fff;
+}
+
+.github-sync-tech-icon {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+}
+
+.github-sync-tech-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.github-sync-tech strong {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.github-sync-tech span {
+  display: block;
+  margin-top: 3px;
+  color: #888;
+  font-size: 10px;
+}
+
+.github-sync-empty {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 20px;
+  border: 1px dashed #d5d5d5;
+  border-radius: 10px;
+  text-align: center;
+  color: #777;
+  font-size: 12px;
+}
+
+.github-sync-empty strong {
+  color: #111;
+}
+
+@media (max-width: 800px) {
+  .github-sync-tech-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .github-sync {
+    padding: 20px;
+  }
+
+  .github-sync-form {
+    flex-direction: column;
+  }
+
+  .github-sync-form button {
+    width: 100%;
+  }
+
+  .github-sync-result-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .github-sync-add {
+    width: 100%;
+  }
+
+  .github-sync-tech-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+.github-sync-confidence {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 2px 5px;
+  border-radius: 999px;
+  background: #f1f1f1;
+  color: #666;
+  font-size: 9px;
+  font-weight: 600;
+  vertical-align: middle;
+}

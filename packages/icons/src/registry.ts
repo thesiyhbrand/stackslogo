@@ -666,6 +666,114 @@ export const icons: IconDefinition[] = [
       light: "/icons/figma/light.svg",
     },
   },
+
+  {
+    slug: "vite",
+    name: "Vite",
+    aliases: ["vitejs"],
+    category: "tool",
+    keywords: [
+      "build tool",
+      "frontend",
+      "bundler",
+    ],
+    homepage: "https://vite.dev",
+    svg: {
+      dark: "/icons/vite/dark.svg",
+      light: "/icons/vite/light.svg",
+    },
+  },
+
+  {
+    slug: "prisma",
+    name: "Prisma",
+    aliases: ["prisma"],
+    category: "tool",
+    keywords: [
+      "database",
+      "ORM",
+      "typescript",
+      "backend",
+    ],
+    homepage: "https://prisma.io",
+    svg: {
+      dark: "/icons/prisma/dark.svg",
+      light: "/icons/prisma/light.svg",
+    },
+  },
+
+  {
+    slug: "drizzle",
+    name: "Drizzle",
+    aliases: ["drizzle"],
+    category: "tool",
+    keywords: [
+      "database",
+      "ORM",
+      "typescript",
+      "backend",
+      "bundler",
+    ],
+    homepage: "https://drizzle.team",
+    svg: {
+      dark: "/icons/drizzle/dark.svg",
+      light: "/icons/drizzle/light.svg",
+    },
+  },
+
+  {
+    slug: "firebase",
+    name: "Firebase",
+    aliases: ["firebase"],
+    category: "database",
+    keywords: [
+      "database",
+      "ORM",
+      "typescript",
+      "backend",
+      "cloud",
+    ],
+    homepage: "https://firebase.google.com/",
+    svg: {
+      dark: "/icons/firebase/dark.svg",
+      light: "/icons/firebase/light.svg",
+    },
+  },
+
+  {
+    slug: "supabase",
+    name: "Supabase",
+    aliases: ["supabase"],
+    category: "database",
+    keywords: [
+      "database",
+      "ORM",
+      "typescript",
+      "backend",
+      "cloud",
+    ],
+    homepage: "https://supabase.com/",
+    svg: {
+      dark: "/icons/supabase/dark.svg",
+      light: "/icons/supabase/light.svg",
+    },
+  },
+
+  {
+    slug: "eslint",
+    name: "ESLint",
+    aliases: ["eslint"],
+    category: "tool",
+    keywords: [
+      "linter",
+      "typescript",
+    ],
+    homepage: "https://eslint.org/",
+    svg: {
+      dark: "/icons/eslint/dark.svg",
+      light: "/icons/eslint/light.svg",
+    },
+  },
 ];
 
 const byAlias = new Map(
