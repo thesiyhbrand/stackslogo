@@ -14,6 +14,7 @@ export interface PackageJson {
     dependencies?: Record<string, string>;
     devDependencies?: Record<string, string>;
     peerDependencies?: Record<string, string>;
+    optionalDependencies?: Record<string, string>;
 }
 
 const FILE_DETECTIONS: Record<
@@ -141,6 +142,12 @@ const PACKAGE_DETECTIONS: Array<{
             reason: "tailwindcss dependency found",
             confidence: 95,
         },
+        {
+            packages: ["bootstrap"],
+            slug: "bootstrap",
+            reason: "bootstrap dependency found",
+            confidence: 95,
+        },
 
         {
             packages: ["express"],
@@ -182,6 +189,54 @@ const PACKAGE_DETECTIONS: Array<{
             slug: "redis",
             reason: "Redis dependency found",
             confidence: 95,
+        },
+        {
+            packages: ["astro"],
+            slug: "astro",
+            reason: "astro dependency found",
+            confidence: 100,
+        },
+        {
+            packages: ["nuxt"],
+            slug: "nuxt",
+            reason: "nuxt dependency found",
+            confidence: 100,
+        },
+        {
+            packages: ["@remix-run/react"],
+            slug: "remix",
+            reason: "Remix dependency found",
+            confidence: 100,
+        },
+        {
+            packages: ["@sveltejs/kit"],
+            slug: "svelte",
+            reason: "SvelteKit dependency found",
+            confidence: 100,
+        },
+        {
+            packages: ["eslint"],
+            slug: "eslint",
+            reason: "eslint dependency found",
+            confidence: 95,
+        },
+        {
+            packages: ["vite"],
+            slug: "vite",
+            reason: "vite dependency found",
+            confidence: 95,
+        },
+        {
+            packages: ["prisma"],
+            slug: "prisma",
+            reason: "prisma dependency found",
+            confidence: 100,
+        },
+        {
+            packages: ["drizzle-orm"],
+            slug: "drizzle",
+            reason: "drizzle dependency found",
+            confidence: 100,
         },
     ];
 
@@ -264,6 +319,18 @@ const CONFIG_DETECTIONS: Array<{
             slug: "eslint",
             reason: "ESLint configuration found",
             confidence: 95,
+        },
+        {
+            files: ["vercel.json"],
+            slug: "vercel",
+            reason: "Vercel configuration found",
+            confidence: 100,
+        },
+        {
+            files: ["vercel.json"],
+            slug: "vercel",
+            reason: "Vercel configuration found",
+            confidence: 100,
         },
     ];
 
@@ -353,26 +420,59 @@ export function detectTechnologies(
         );
     }
 
-    for (const detection of CONFIG_DETECTIONS) {
-        const found =
-            detection.files.some(
-                (filePath) =>
-                    files.some(
-                        (file) =>
-                            file.path === filePath
-                    )
-            );
+    for (const file of files) {
+        const filePath = file.path;
 
-        if (!found) {
-            continue;
+        if (
+            file.path.startsWith(".github/workflows/") &&
+            (file.path.endsWith(".yml") ||
+                file.path.endsWith(".yaml"))
+        ) {
+            addDetection(
+                detected,
+                "github-actions",
+                100,
+                "GitHub Actions workflow found"
+            );
         }
 
-        addDetection(
-            detected,
-            detection.slug,
-            detection.confidence,
-            detection.reason
-        );
+        if (
+            file.type === "file" &&
+            (
+                filePath.startsWith("k8s/") ||
+                filePath.startsWith("kubernetes/") ||
+                filePath.startsWith(".k8s/")
+            )
+        ) {
+            addDetection(
+                detected,
+                "kubernetes",
+                100,
+                "Kubernetes manifest found"
+            );
+        }
+
+        for (const detection of CONFIG_DETECTIONS) {
+            const matched = detection.files.some((configuredFile) => {
+                if (configuredFile.includes("/")) {
+                    return filePath === configuredFile;
+                }
+
+                return (
+                    file.name.toLowerCase() ===
+                    configuredFile.toLowerCase()
+                );
+            });
+
+            if (matched) {
+                addDetection(
+                    detected,
+                    detection.slug,
+                    detection.confidence,
+                    detection.reason
+                );
+            }
+        }
     }
 
     for (const detection of SOURCE_DETECTIONS) {
@@ -405,9 +505,10 @@ export function detectTechnologies(
 
     for (const packageJson of packageJsons) {
         const dependencies = {
-            ...(packageJson.dependencies ?? {}),
-            ...(packageJson.devDependencies ?? {}),
-            ...(packageJson.peerDependencies ?? {}),
+            ...packageJson.dependencies,
+            ...packageJson.devDependencies,
+            ...packageJson.peerDependencies,
+            ...packageJson.optionalDependencies,
         };
 
         const dependencyNames =
@@ -433,6 +534,15 @@ export function detectTechnologies(
                 detection.reason
             );
         }
+    }
+
+    if (detected.has("nextjs") && !detected.has("react")) {
+        addDetection(
+            detected,
+            "react",
+            90,
+            "React inferred from Next.js"
+        );
     }
 
     return Array.from(
@@ -469,35 +579,35 @@ function addDetection(
 }
 
 function getFileExtension(
-  filename: string
+    filename: string
 ): string {
-  const lowercase =
-    filename.toLowerCase();
+    const lowercase =
+        filename.toLowerCase();
 
-  const lastDot =
-    lowercase.lastIndexOf(".");
+    const lastDot =
+        lowercase.lastIndexOf(".");
 
-  if (lastDot === -1) {
-    return "";
-  }
+    if (lastDot === -1) {
+        return "";
+    }
 
-  return lowercase.slice(lastDot);
+    return lowercase.slice(lastDot);
 }
 
 function getSourceConfidence(
-  fileCount: number
+    fileCount: number
 ): number {
-  if (fileCount >= 10) {
-    return 90;
-  }
+    if (fileCount >= 10) {
+        return 90;
+    }
 
-  if (fileCount >= 5) {
-    return 85;
-  }
+    if (fileCount >= 5) {
+        return 85;
+    }
 
-  if (fileCount >= 2) {
-    return 75;
-  }
+    if (fileCount >= 2) {
+        return 75;
+    }
 
-  return 60;
+    return 60;
 }
