@@ -83,14 +83,9 @@ export function createStackApiUrl(
   settings: StackSettings,
   origin = ""
 ): string {
-  if (selected.length === 0) {
-    return "";
-  }
+  if (selected.length === 0) return "";
 
-  const query = createStackQuery(
-    selected,
-    settings
-  );
+  const query = createStackQuery(selected, settings);
 
   return `${origin}/api/stack?${query}`;
 }

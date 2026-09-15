@@ -48,19 +48,19 @@ export default function GitHubStackSync({
   const [selectedSlugs, setSelectedSlugs] =
     useState<string[]>([]);
 
-  useEffect(() => {
-    if (!result) {
-      setSelectedSlugs([]);
-      return;
-    }
+  const [addedToBuilder, setAddedToBuilder] = useState(false);
 
+  const [prevResult, setPrevResult] = useState<typeof result>(null);
+  if (result !== prevResult) {
+    setPrevResult(result);
     setSelectedSlugs(
-      result.technologies.map(
-        (technology) =>
-          technology.slug
-      )
+      result
+        ? result.technologies.map(
+            (technology) => technology.slug
+          )
+        : []
     );
-  }, [result]);
+  }
 
   async function analyzeRepository() {
     const value = repo.trim();
@@ -137,15 +137,23 @@ export default function GitHubStackSync({
   }
 
   function handleAddToBuilder() {
-    if (
-      selectedSlugs.length === 0
-    ) {
-      return;
-    }
+    if (!result || selectedSlugs.length === 0) return;
 
-    onAddToBuilder(
-      selectedSlugs
-    );
+    onAddToBuilder(selectedSlugs);
+    setAddedToBuilder(true);
+
+    window.setTimeout(() => {
+      setAddedToBuilder(false);
+    }, 2500);
+
+    window.setTimeout(() => {
+      document
+        .getElementById("stack-builder")
+        ?.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+    }, 100);
   }
 
   return (
@@ -227,18 +235,29 @@ export default function GitHubStackSync({
 
             {result.technologies.length >
               0 && (
-                <button
-                  type="button"
-                  className="github-sync-add"
-                  onClick={
-                    handleAddToBuilder
-                  }
-                  disabled={
-                    selectedSlugs.length === 0
-                  }
-                >
-                  Add {selectedSlugs.length} to Builder →
-                </button>
+                <>
+                  <button
+                    type="button"
+                    className="github-sync-add"
+                    onClick={
+                      handleAddToBuilder
+                    }
+                    disabled={
+                      selectedSlugs.length === 0
+                    }
+                  >
+                    Add {selectedSlugs.length} to Builder →
+                  </button>
+
+                  {addedToBuilder && (
+                    <div
+                      className="github-sync-success"
+                      role="status"
+                    >
+                      ✓ Stack added to Builder. Customize it below.
+                    </div>
+                  )}
+                </>
               )}
           </div>
 
@@ -250,7 +269,7 @@ export default function GitHubStackSync({
               </strong>
 
               <span>
-                Stackslogo couldn't confidently identify
+                Stackslogo couldn&apos;t confidently identify
                 any technologies in this repository.
                 Feel free to build your stack manually.
               </span>
