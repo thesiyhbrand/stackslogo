@@ -13,6 +13,7 @@ interface GitHubFile {
 export interface PackageJson {
     dependencies?: Record<string, string>;
     devDependencies?: Record<string, string>;
+    peerDependencies?: Record<string, string>;
 }
 
 const FILE_DETECTIONS: Record<
@@ -25,6 +26,21 @@ const FILE_DETECTIONS: Record<
     "package.json": {
         slug: "nodejs",
         reason: "package.json found",
+    },
+
+    "pnpm-lock.yaml": {
+        slug: "nodejs",
+        reason: "pnpm lockfile found",
+    },
+
+    "package-lock.json": {
+        slug: "nodejs",
+        reason: "npm lockfile found",
+    },
+
+    "yarn.lock": {
+        slug: "nodejs",
+        reason: "Yarn lockfile found",
     },
 
     "tsconfig.json": {
@@ -251,9 +267,69 @@ const CONFIG_DETECTIONS: Array<{
         },
     ];
 
+const SOURCE_DETECTIONS: Array<{
+    extensions: string[];
+    slug: string;
+    reason: string;
+}> = [
+        {
+            extensions: [".ts", ".tsx"],
+            slug: "typescript",
+            reason: "TypeScript source files found",
+        },
+
+        {
+            extensions: [".js", ".jsx", ".mjs", ".cjs"],
+            slug: "javascript",
+            reason: "JavaScript source files found",
+        },
+
+        {
+            extensions: [".html", ".htm"],
+            slug: "html",
+            reason: "HTML source files found",
+        },
+
+        {
+            extensions: [".css"],
+            slug: "css",
+            reason: "CSS source files found",
+        },
+
+        {
+            extensions: [".py"],
+            slug: "python",
+            reason: "Python source files found",
+        },
+
+        {
+            extensions: [".java"],
+            slug: "java",
+            reason: "Java source files found",
+        },
+
+        {
+            extensions: [".go"],
+            slug: "go",
+            reason: "Go source files found",
+        },
+
+        {
+            extensions: [".rs"],
+            slug: "rust",
+            reason: "Rust source files found",
+        },
+
+        {
+            extensions: [".php"],
+            slug: "php",
+            reason: "PHP source files found",
+        },
+    ];
+
 export function detectTechnologies(
     files: GitHubFile[],
-    packageJson?: PackageJson
+    packageJsons: PackageJson[] = []
 ): DetectedTechnology[] {
     const detected =
         new Map<string, DetectedTechnology>();
@@ -299,10 +375,39 @@ export function detectTechnologies(
         );
     }
 
-    if (packageJson) {
+    for (const detection of SOURCE_DETECTIONS) {
+        const matchingFiles =
+            files.filter((file) => {
+                const extension =
+                    getFileExtension(file.name);
+
+                return detection.extensions.includes(
+                    extension
+                );
+            });
+
+        if (matchingFiles.length === 0) {
+            continue;
+        }
+
+        const confidence =
+            getSourceConfidence(
+                matchingFiles.length
+            );
+
+        addDetection(
+            detected,
+            detection.slug,
+            confidence,
+            `${detection.reason} (${matchingFiles.length})`
+        );
+    }
+
+    for (const packageJson of packageJsons) {
         const dependencies = {
             ...(packageJson.dependencies ?? {}),
             ...(packageJson.devDependencies ?? {}),
+            ...(packageJson.peerDependencies ?? {}),
         };
 
         const dependencyNames =
@@ -361,4 +466,38 @@ function addDetection(
             reason,
         });
     }
+}
+
+function getFileExtension(
+  filename: string
+): string {
+  const lowercase =
+    filename.toLowerCase();
+
+  const lastDot =
+    lowercase.lastIndexOf(".");
+
+  if (lastDot === -1) {
+    return "";
+  }
+
+  return lowercase.slice(lastDot);
+}
+
+function getSourceConfidence(
+  fileCount: number
+): number {
+  if (fileCount >= 10) {
+    return 90;
+  }
+
+  if (fileCount >= 5) {
+    return 85;
+  }
+
+  if (fileCount >= 2) {
+    return 75;
+  }
+
+  return 60;
 }

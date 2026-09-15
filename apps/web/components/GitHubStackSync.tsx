@@ -1,6 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import {
+  useEffect,
+  useState,
+} from "react";
 
 import type { IconDefinition } from "@devicons/icons";
 
@@ -41,6 +44,23 @@ export default function GitHubStackSync({
     useState<DetectionResponse | null>(
       null
     );
+
+  const [selectedSlugs, setSelectedSlugs] =
+    useState<string[]>([]);
+
+  useEffect(() => {
+    if (!result) {
+      setSelectedSlugs([]);
+      return;
+    }
+
+    setSelectedSlugs(
+      result.technologies.map(
+        (technology) =>
+          technology.slug
+      )
+    );
+  }, [result]);
 
   async function analyzeRepository() {
     const value = repo.trim();
@@ -86,16 +106,45 @@ export default function GitHubStackSync({
     }
   }
 
+  function toggleTechnology(
+    slug: string
+  ) {
+    setSelectedSlugs((current) => {
+      if (current.includes(slug)) {
+        return current.filter(
+          (item) =>
+            item !== slug
+        );
+      }
+
+      return [
+        ...current,
+        slug,
+      ];
+    });
+  }
+
+  function selectAllTechnologies() {
+    if (!result) return;
+
+    setSelectedSlugs(
+      result.technologies.map((technology) => technology.slug)
+    );
+  }
+
+  function clearAllTechnologies() {
+    setSelectedSlugs([]);
+  }
+
   function handleAddToBuilder() {
-    if (!result) {
+    if (
+      selectedSlugs.length === 0
+    ) {
       return;
     }
 
     onAddToBuilder(
-      result.technologies.map(
-        (technology) =>
-          technology.slug
-      )
+      selectedSlugs
     );
   }
 
@@ -147,8 +196,17 @@ export default function GitHubStackSync({
       </div>
 
       {error && (
-        <div className="github-sync-error">
-          {error}
+        <div
+          className="github-sync-error"
+          role="alert"
+        >
+          <strong>
+            Unable to analyze repository
+          </strong>
+
+          <span>
+            {error}
+          </span>
         </div>
       )}
 
@@ -175,8 +233,11 @@ export default function GitHubStackSync({
                   onClick={
                     handleAddToBuilder
                   }
+                  disabled={
+                    selectedSlugs.length === 0
+                  }
                 >
-                  Add to Builder →
+                  Add {selectedSlugs.length} to Builder →
                 </button>
               )}
           </div>
@@ -185,60 +246,109 @@ export default function GitHubStackSync({
             0 ? (
             <div className="github-sync-empty">
               <strong>
-                No supported technologies
-                detected.
+                No supported technologies detected.
               </strong>
 
               <span>
-                Try another repository or
-                select technologies manually.
+                Stackslogo couldn't confidently identify
+                any technologies in this repository.
+                Feel free to build your stack manually.
               </span>
             </div>
           ) : (
-            <div className="github-sync-tech-grid">
-              {result.technologies.map(
-                (technology) => {
-                  const icon =
-                    icons.find(
-                      (item) =>
-                        item.slug ===
-                        technology.slug
+            <div>
+              <div className="github-sync-selection-bar">
+                <span>
+                  {selectedSlugs.length} of {result?.technologies.length ?? 0} selected
+                </span>
+
+                <div className="github-sync-selection-actions">
+                  <button
+                    type="button"
+                    onClick={selectAllTechnologies}
+                    disabled={
+                      !result ||
+                      selectedSlugs.length === result.technologies.length
+                    }
+                  >
+                    Select All
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={clearAllTechnologies}
+                    disabled={selectedSlugs.length === 0}
+                  >
+                    Clear All
+                  </button>
+                </div>
+              </div>
+              <div className="github-sync-tech-grid">
+                {result.technologies.map(
+                  (technology) => {
+                    const icon =
+                      icons.find(
+                        (item) =>
+                          item.slug ===
+                          technology.slug
+                      );
+
+                    if (!icon) {
+                      return null;
+                    }
+
+                    return (
+                      <button
+                        key={technology.slug}
+                        type="button"
+                        className={
+                          selectedSlugs.includes(
+                            technology.slug
+                          )
+                            ? "github-sync-tech selected"
+                            : "github-sync-tech"
+                        }
+                        onClick={() =>
+                          toggleTechnology(
+                            technology.slug
+                          )
+                        }
+                        aria-pressed={selectedSlugs.includes(
+                          technology.slug
+                        )}
+                      >
+                        <span className="github-sync-tech-check">
+                          {selectedSlugs.includes(
+                            technology.slug
+                          )
+                            ? "✓"
+                            : ""}
+                        </span>
+                        <div className="github-sync-tech-icon">
+                          <img
+                            src={icon.svg.dark}
+                            alt=""
+                          />
+                        </div>
+
+                        <div>
+                          <strong>
+                            {icon.name}
+                          </strong>
+
+                          <small className="github-sync-confidence">
+                            {technology.confidence >= 95
+                              ? "Detected"
+                              : "Likely"}
+                          </small>
+                        </div>
+                      </button>
                     );
-
-                  if (!icon) {
-                    return null;
                   }
-
-                  return (
-                    <div
-                      key={
-                        technology.slug
-                      }
-                      className="github-sync-tech"
-                    >
-                      <div className="github-sync-tech-icon">
-                        <img
-                          src={icon.svg.dark}
-                          alt=""
-                        />
-                      </div>
-
-                      <div>
-                        <strong>
-                          {icon.name}
-                        </strong>
-
-                        <small className="github-sync-confidence">
-                          {technology.confidence >= 95
-                            ? "Detected"
-                            : "Likely"}
-                        </small>
-                      </div>
-                    </div>
-                  );
-                }
-              )}
+                )}
+              </div>
             </div>
+
           )}
         </div>
       )}

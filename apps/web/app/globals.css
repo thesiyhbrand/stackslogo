@@ -1062,15 +1062,13 @@ img {
   padding: 40px;
 
   background:
-    linear-gradient(
-      45deg,
+    linear-gradient(45deg,
       #f3f3f3 25%,
       #ffffff 25%,
       #ffffff 50%,
       #f3f3f3 50%,
       #f3f3f3 75%,
-      #ffffff 75%
-    );
+      #ffffff 75%);
 
   background-size: 24px 24px;
 }
@@ -1092,20 +1090,16 @@ img {
 
 .preview-glass {
   background:
-    radial-gradient(
-      circle at center,
+    radial-gradient(circle at center,
       #ffffff,
-      #f3f3f3 70%
-    );
+      #f3f3f3 70%);
 }
 
 .preview-neon {
   background:
-    radial-gradient(
-      circle at center,
+    radial-gradient(circle at center,
       #ffffff,
-      #f5f5f5 70%
-    );
+      #f5f5f5 70%);
 }
 
 .preview-monochrome {
@@ -1785,10 +1779,8 @@ a:focus-visible {
 .icon-grid {
   display: grid;
   grid-template-columns:
-    repeat(
-      auto-fill,
-      minmax(120px, 1fr)
-    );
+    repeat(auto-fill,
+      minmax(120px, 1fr));
   gap: 12px;
 }
 
@@ -1942,8 +1934,7 @@ a:focus-visible {
   line-height: 1;
 }
 
-.category-tab.active
-  .category-tab-count {
+.category-tab.active .category-tab-count {
   background: rgba(255, 255, 255, 0.18);
   color: #fff;
 }
@@ -2120,7 +2111,7 @@ a:focus-visible {
   background: #fff;
 }
 
-.output-tip > span {
+.output-tip>span {
   font-size: 11px;
   font-weight: 700;
   color: #999;
@@ -2219,12 +2210,20 @@ a:focus-visible {
 }
 
 .github-sync-error {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
   margin-top: 12px;
-  padding: 12px 14px;
+  padding: 13px 14px;
   border: 1px solid #e2caca;
   border-radius: 9px;
   background: #fff;
   color: #a33;
+  font-size: 12px;
+}
+
+.github-sync-error strong {
+  color: #722;
   font-size: 13px;
 }
 
@@ -2363,4 +2362,123 @@ a:focus-visible {
   font-size: 9px;
   font-weight: 600;
   vertical-align: middle;
+}
+
+
+.github-sync-tech {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid #e3e3e3;
+  border-radius: 10px;
+  background: #fff;
+  color: #111;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.github-sync-tech:hover {
+  border-color: #aaa;
+}
+
+.github-sync-tech.selected {
+  border-color: #111;
+  background: #fafafa;
+  box-shadow:
+    0 0 0 1px #111;
+}
+
+.github-sync-tech-check {
+  position: absolute;
+  top: 7px;
+  right: 8px;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #111;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.github-sync-tech:not(.selected) .github-sync-tech-check {
+  background: #eee;
+  color: transparent;
+}
+
+.github-sync-add:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.github-sync-tech:focus-visible {
+  outline: 2px solid #111;
+  outline-offset: 3px;
+}
+
+
+.github-sync-selection-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 18px 0 12px;
+  padding: 10px 12px;
+  border: 1px solid #e5e5e5;
+  border-radius: 10px;
+  background: #fafafa;
+  font-size: 12px;
+  color: #666;
+}
+
+.github-sync-selection-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.github-sync-selection-actions button {
+  border: 1px solid #ddd;
+  border-radius: 7px;
+  padding: 7px 10px;
+  background: #fff;
+  color: #333;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.github-sync-selection-actions button:hover:not(:disabled) {
+  border-color: #aaa;
+  background: #f5f5f5;
+}
+
+.github-sync-selection-actions button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+@media (max-width: 600px) {
+  .github-sync-selection-bar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .github-sync-selection-actions {
+    width: 100%;
+  }
+
+  .github-sync-selection-actions button {
+    flex: 1;
+  }
 }

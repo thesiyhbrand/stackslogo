@@ -52,10 +52,40 @@ export async function GET(
       });
 
     if (!response.ok) {
+      if (response.status === 404) {
+        return Response.json(
+          {
+            error:
+              "Repository not found or it is private.",
+          },
+          { status: 404 }
+        );
+      }
+
+      if (response.status === 403) {
+        return Response.json(
+          {
+            error:
+              "GitHub API rate limit reached. Please try again later.",
+          },
+          { status: 429 }
+        );
+      }
+
+      if (response.status === 401) {
+        return Response.json(
+          {
+            error:
+              "GitHub requires authentication for this repository.",
+          },
+          { status: 401 }
+        );
+      }
+
       return Response.json(
         {
           error:
-            "Unable to access GitHub repository.",
+            "GitHub could not access this repository.",
         },
         {
           status: response.status,
@@ -65,6 +95,26 @@ export async function GET(
 
     const data =
       await response.json();
+
+    if (data.truncated) {
+      return Response.json(
+        {
+          error:
+            "This repository is too large to analyze completely.",
+        },
+        { status: 413 }
+      );
+    }
+
+    if (!Array.isArray(data.tree)) {
+      return Response.json(
+        {
+          error:
+            "GitHub returned an invalid repository tree.",
+        },
+        { status: 502 }
+      );
+    }
 
     const files =
       data.tree
@@ -87,32 +137,36 @@ export async function GET(
           })
         );
 
-    const packageFile =
-      files.find(
-        (file: {
-          name: string;
-          path: string;
-        }) =>
-          file.path ===
+    const packageFiles =
+      files.filter(
+        (file) =>
+          file.name ===
           "package.json"
       );
 
-    let packageJson;
+    const packageFilesToRead =
+      packageFiles.slice(0, 20);
 
-    if (packageFile) {
-      packageJson =
-        await fetchPackageJson(
-          parsed.owner,
-          parsed.repo
-        );
-    }
+    const packageJsons =
+      await Promise.all(
+        packageFilesToRead.map(
+          (file) =>
+            fetchPackageJson(
+              parsed.owner,
+              parsed.repo,
+              file.path
+            )
+        )
+      );
+
 
     const technologies =
       detectTechnologies(
         files,
-        packageJson
+        packageJsons.filter(
+          Boolean
+        )
       );
-
     return Response.json({
       repository: {
         owner: parsed.owner,
@@ -139,10 +193,11 @@ export async function GET(
 
 async function fetchPackageJson(
   owner: string,
-  repo: string
+  repo: string,
+  filePath: string
 ) {
   const url =
-    `https://api.github.com/repos/${owner}/${repo}/contents/package.json`;
+    `https://api.github.com/repos/${owner}/${repo}/contents/${filePath}`;
 
   const response =
     await fetch(url, {
