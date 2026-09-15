@@ -9,7 +9,8 @@
     "lint": "turbo lint",
     "typecheck": "turbo typecheck",
     "validate:icons": "pnpm --filter @devicons/icons validate",
-    "validate:assets": "tsx scripts/validate-icons.ts"
+    "validate:assets": "tsx scripts/validate-icons.ts",
+    "test:detector": "tsx scripts/test-github-detector.ts"
   },
   "devDependencies": {
     "tsx": "^4.23.13",
