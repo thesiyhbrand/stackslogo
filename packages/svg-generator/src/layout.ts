@@ -17,48 +17,54 @@ export function getGridPositions(
   perline: number,
   gap: number
 ): GridLayout {
-  const columns = Math.min(count, perline);
-  const rows = Math.ceil(count / perline);
+  if (count <= 0) {
+    return {
+      width: 0,
+      height: 0,
+      positions: [],
+    };
+  }
+
+  const safeSize = Math.max(1, Math.round(size));
+  const safePerline = Math.max(1, Math.floor(perline));
+  const safeGap = Math.max(0, Math.round(gap));
+
+  const columns = Math.min(count, safePerline);
+  const rows = Math.ceil(count / safePerline);
 
   const width =
-    columns * size +
-    Math.max(0, columns - 1) * gap;
+    columns * safeSize +
+    Math.max(0, columns - 1) * safeGap;
 
   const height =
-    rows * size +
-    Math.max(0, rows - 1) * gap;
+    rows * safeSize +
+    Math.max(0, rows - 1) * safeGap;
 
-  const positions = Array.from(
-    { length: count },
-    (_, index) => {
-      const row = Math.floor(index / perline);
-      const column = index % perline;
+  const positions: GridPosition[] = [];
 
-      const iconsInThisRow =
-        row === rows - 1
-          ? count - row * perline
-          : columns;
+  for (let index = 0; index < count; index += 1) {
+    const row = Math.floor(index / safePerline);
+    const column = index % safePerline;
 
-      const rowWidth =
-        iconsInThisRow * size +
-        Math.max(0, iconsInThisRow - 1) * gap;
+    const isLastRow = row === rows - 1;
 
-      const rowOffset =
-        (width - rowWidth) / 2;
+    const iconsInRow = isLastRow
+      ? count - row * safePerline
+      : columns;
 
-      return {
-        row,
-        column,
+    const rowWidth =
+      iconsInRow * safeSize +
+      Math.max(0, iconsInRow - 1) * safeGap;
 
-        x:
-          rowOffset +
-          column * (size + gap),
+    const rowOffset = (width - rowWidth) / 2;
 
-        y:
-          row * (size + gap),
-      };
-    }
-  );
+    positions.push({
+      row,
+      column,
+      x: rowOffset + column * (safeSize + safeGap),
+      y: row * (safeSize + safeGap),
+    });
+  }
 
   return {
     width,

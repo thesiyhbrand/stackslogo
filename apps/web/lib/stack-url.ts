@@ -1,9 +1,7 @@
 import type { IconDefinition } from "@devicons/icons";
-
 import type { StackSettings } from "../components/BuilderApp";
 
 const DEFAULT_SETTINGS: StackSettings = {
-  theme: "dark",
   size: 64,
   perline: 5,
   gap: 12,
@@ -25,20 +23,7 @@ export function createStackQuery(
     );
   }
 
-  if (
-    settings.theme !==
-    DEFAULT_SETTINGS.theme
-  ) {
-    params.set(
-      "theme",
-      settings.theme
-    );
-  }
-
-  if (
-    settings.size !==
-    DEFAULT_SETTINGS.size
-  ) {
+  if (settings.size !== DEFAULT_SETTINGS.size) {
     params.set(
       "size",
       String(settings.size)
@@ -55,20 +40,14 @@ export function createStackQuery(
     );
   }
 
-  if (
-    settings.gap !==
-    DEFAULT_SETTINGS.gap
-  ) {
+  if (settings.gap !== DEFAULT_SETTINGS.gap) {
     params.set(
       "gap",
       String(settings.gap)
     );
   }
 
-  if (
-    settings.style !==
-    DEFAULT_SETTINGS.style
-  ) {
+  if (settings.style !== DEFAULT_SETTINGS.style) {
     params.set(
       "style",
       settings.style
@@ -79,15 +58,34 @@ export function createStackQuery(
 }
 
 export function createStackApiUrl(
-  selected: IconDefinition[],
   settings: StackSettings,
-  origin = ""
+  icons: IconDefinition[],
+  origin: string
 ): string {
-  if (selected.length === 0) return "";
+  const params = new URLSearchParams();
 
-  const query = createStackQuery(selected, settings);
+  params.set(
+    "i",
+    icons.map((icon) => icon.slug).join(",")
+  );
 
-  return `${origin}/api/stack?${query}`;
+  if (settings.size !== 64) {
+    params.set("size", String(settings.size));
+  }
+
+  if (settings.perline !== 5) {
+    params.set("perline", String(settings.perline));
+  }
+
+  if (settings.gap !== 12) {
+    params.set("gap", String(settings.gap));
+  }
+
+  if (settings.style !== "minimal") {
+    params.set("style", settings.style);
+  }
+
+  return `${origin}/api/stack?${params.toString()}`;
 }
 
 export function createBuilderUrl(
