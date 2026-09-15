@@ -71,18 +71,6 @@ export async function GET(
     }
 
     /*
-     * THEME
-     */
-
-    const themeParam =
-      searchParams.get("theme");
-
-    const theme =
-      themeParam === "light"
-        ? "light"
-        : "dark";
-
-    /*
      * SIZE
      */
 
@@ -151,8 +139,7 @@ export async function GET(
 
     const style =
       styleParam === "glass" ||
-      styleParam === "neon" ||
-      styleParam === "monochrome"
+        styleParam === "neon"
         ? styleParam
         : "minimal";
 
@@ -163,18 +150,16 @@ export async function GET(
     const url =
       new URL(request.url);
 
-    const svg =
-      await generateSvgFromIcons(
-        {
-          icons: selectedIcons,
-          theme,
-          size,
-          perline,
-          gap,
-          style,
-        },
-        url.origin
-      );
+    const svg = await generateSvgFromIcons(
+      {
+        icons: selectedIcons,
+        size,
+        perline,
+        gap,
+        style,
+      },
+      url.origin
+    );
 
     /*
      * RESPONSE

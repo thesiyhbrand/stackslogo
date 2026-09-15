@@ -17,12 +17,12 @@ interface BuilderAppProps {
   icons: IconDefinition[];
 }
 
-export type Theme = "dark" | "light";
-
-export type StackStyle = "minimal" | "glass" | "neon" | "monochrome";
+export type StackStyle =
+  | "minimal"
+  | "glass"
+  | "neon";
 
 export interface StackSettings {
-  theme: Theme;
   size: number;
   perline: number;
   gap: number;
@@ -30,7 +30,6 @@ export interface StackSettings {
 }
 
 const defaultSettings: StackSettings = {
-  theme: "dark",
   size: 64,
   perline: 5,
   gap: 12,
@@ -87,8 +86,6 @@ export default function BuilderApp({ icons }: BuilderAppProps) {
 
     if (selected.length > 0) {
       params.set("i", selected.map((icon) => icon.slug).join(","));
-
-      params.set("theme", settings.theme);
 
       params.set("size", String(settings.size));
 
@@ -228,7 +225,7 @@ export default function BuilderApp({ icons }: BuilderAppProps) {
           addDetectedToBuilder
         }
       />
-      
+
       <IconExplorer icons={icons} selected={selected} onToggle={toggleIcon} onApplyPreset={applyPreset} />
 
       <StackBuilder

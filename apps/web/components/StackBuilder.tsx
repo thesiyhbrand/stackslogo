@@ -39,6 +39,12 @@ export default function StackBuilder({
   const [copiedMarkdown, setCopiedMarkdown] =
     useState(false);
 
+  const [origin, setOrigin] = useState("");
+
+  useEffect(() => {
+    setOrigin(window.location.origin);
+  }, []);
+
   useEffect(() => {
     let cancelled = false;
 
@@ -49,14 +55,16 @@ export default function StackBuilder({
       }
 
       try {
-        const svg = await generateSvgFromIcons({
-          icons: selected,
-          theme: settings.theme,
-          size: settings.size,
-          perline: settings.perline,
-          gap: settings.gap,
-          style: settings.style,
-        });
+        const svg = await generateSvgFromIcons(
+          {
+            icons: selected,
+            size: settings.size,
+            perline: settings.perline,
+            gap: settings.gap,
+            style: settings.style,
+          },
+          window.location.origin
+        );
 
         if (!cancelled) {
           setGeneratedSvg(svg);
@@ -77,7 +85,6 @@ export default function StackBuilder({
     };
   }, [
     selected,
-    settings.theme,
     settings.size,
     settings.perline,
     settings.gap,
@@ -85,26 +92,13 @@ export default function StackBuilder({
   ]);
 
 
-
-  const stackUrl =
-    createStackApiUrl(
-      selected,
-      settings
-    );
-
   const stackApiUrl = createStackApiUrl(
-    selected,
     settings,
-    typeof window !== "undefined"
-      ? window.location.origin
-      : ""
+    selected,
+    origin
   );
 
-
-
-  const origin = typeof window !== "undefined" ? window.location.origin : "";
-
-  const fullStackUrl = stackUrl ? `${origin}${stackUrl}` : "";
+  const fullStackUrl = stackApiUrl;
 
   const markdown = fullStackUrl ? `![My Stack](${fullStackUrl})` : "";
 
@@ -240,7 +234,10 @@ export default function StackBuilder({
         ) : (
           selected.map((icon) => (
             <div className="selected-icon" key={icon.slug}>
-              <img src={icon.svg[settings.theme]} alt={icon.name} />
+              <img
+                src={icon.svg.dark}
+                alt={icon.name}
+              />
 
               <span>{icon.name}</span>
 
@@ -271,52 +268,6 @@ export default function StackBuilder({
               <h3>
                 Make it yours.
               </h3>
-            </div>
-          </div>
-
-          {/* THEME */}
-
-          <div className="setting-row">
-            <div className="setting-info">
-              <strong>Theme</strong>
-
-              <span>
-                Choose the icon theme.
-              </span>
-            </div>
-
-            <div className="setting-buttons">
-              <button
-                type="button"
-                className={
-                  settings.theme === "dark"
-                    ? "setting-button active"
-                    : "setting-button"
-                }
-                onClick={() =>
-                  onSettingsChange({
-                    theme: "dark",
-                  })
-                }
-              >
-                Dark
-              </button>
-
-              <button
-                type="button"
-                className={
-                  settings.theme === "light"
-                    ? "setting-button active"
-                    : "setting-button"
-                }
-                onClick={() =>
-                  onSettingsChange({
-                    theme: "light",
-                  })
-                }
-              >
-                Light
-              </button>
             </div>
           </div>
 
@@ -448,10 +399,6 @@ export default function StackBuilder({
 
               <option value="neon">
                 Neon
-              </option>
-
-              <option value="monochrome">
-                Monochrome
               </option>
             </select>
           </div>

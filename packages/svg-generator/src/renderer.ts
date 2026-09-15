@@ -7,45 +7,34 @@ export function renderIcon(
   y: number,
   options: GenerateOptions
 ): string {
-  const svg = icon.svg[options.theme];
+  const svg = scopeSvgIds(icon.svg.dark, icon.slug);
 
-  const viewBoxMatch =
-    svg.match(/viewBox="([^"]+)"/i);
+  const viewBoxMatch = svg.match(
+    /viewBox="([^"]+)"/i
+  );
 
   const viewBox =
-    viewBoxMatch
-      ? viewBoxMatch[1]
-      : "0 0 128 128";
+    viewBoxMatch?.[1] ?? "0 0 128 128";
 
-  const content = svg
-    .replace(/<\?xml[\s\S]*?\?>/gi, "")
-    .replace(/<!DOCTYPE[\s\S]*?>/gi, "")
-    .replace(/<svg\b[^>]*>/i, "")
-    .replace(/<\/svg>/i, "");
+  let content = extractSvgContent(svg);
 
   const radius = Math.max(
     8,
-    options.size * 0.16
+    Math.round(options.size * 0.16)
   );
 
-  const background =
-    getStyleBackground(options);
+  const wrapper = renderStyleWrapper(
+    x,
+    y,
+    options.size,
+    radius,
+    options
+  );
 
-  const effects =
-    getStyleEffects(options);
-
-  const wrapper =
-    getStyleWrapper(
-      x,
-      y,
-      options.size,
-      radius,
-      options
-    );
+  const effects = getStyleEffects(options);
 
   return `
     ${wrapper}
-
     <svg
       x="${x}"
       y="${y}"
@@ -57,42 +46,27 @@ export function renderIcon(
     >
       ${content}
     </svg>
-  `;
+  `.trim();
 }
 
-function getStyleBackground(
-  options: GenerateOptions
+function extractSvgContent(
+  svg: string
 ): string {
-  switch (options.style) {
-    case "glass":
-      return options.theme === "dark"
-        ? "rgba(255,255,255,0.06)"
-        : "rgba(0,0,0,0.04)";
-
-    case "neon":
-      return "transparent";
-
-    case "monochrome":
-      return options.theme === "dark"
-        ? "#1a1a1a"
-        : "#f2f2f2";
-
-    case "minimal":
-    default:
-      return "transparent";
-  }
+  return svg
+    .replace(/<\?xml[\s\S]*?\?>/gi, "")
+    .replace(/<!DOCTYPE[\s\S]*?>/gi, "")
+    .replace(/<svg\b[^>]*>/i, "")
+    .replace(/<\/svg>/i, "")
+    .trim();
 }
 
-function getStyleWrapper(
+function renderStyleWrapper(
   x: number,
   y: number,
   size: number,
   radius: number,
   options: GenerateOptions
 ): string {
-  const background =
-    getStyleBackground(options);
-
   switch (options.style) {
     case "glass":
       return `
@@ -102,48 +76,41 @@ function getStyleWrapper(
           width="${size}"
           height="${size}"
           rx="${radius}"
-          fill="${background}"
-          stroke="${
-            options.theme === "dark"
-              ? "rgba(255,255,255,0.12)"
-              : "rgba(0,0,0,0.08)"
-          }"
+          fill="rgba(255,255,255,0.055)"
+          stroke="rgba(255,255,255,0.14)"
           stroke-width="1"
         />
-      `;
+      `.trim();
 
-    case "monochrome":
-      return `
-        <rect
-          x="${x}"
-          y="${y}"
-          width="${size}"
-          height="${size}"
-          rx="${radius}"
-          fill="${background}"
-        />
-      `;
-
-    case "neon":
     case "minimal":
+    case "neon":
     default:
       return "";
   }
 }
 
-function getStyleEffects(
-  options: GenerateOptions
-): string {
-  switch (options.style) {
-    case "neon":
-      return `filter="url(#neon-glow)"`;
-
-    case "monochrome":
-      return `filter="url(#monochrome)"`;
-
-    case "glass":
-    case "minimal":
-    default:
-      return "";
+function getStyleEffects(options: GenerateOptions): string {
+  if (options.style === "neon") {
+    return 'filter="url(#neon-glow)"';
   }
+
+  return "";
 }
+function scopeSvgIds(svg: string, slug: string): string {
+  const prefix = `icon-${slug}-`;
+
+  return svg
+    .replace(/\bid="([^"]+)"/g, (_, id) => {
+      return `id="${prefix}${id}"`;
+    })
+    .replace(/url\(#([^)]+)\)/g, (_, id) => {
+      return `url(#${prefix}${id})`;
+    })
+    .replace(/href="#([^"]+)"/g, (_, id) => {
+      return `href="#${prefix}${id}"`;
+    })
+    .replace(/xlink:href="#([^"]+)"/g, (_, id) => {
+      return `xlink:href="#${prefix}${id}"`;
+    });
+}
+
