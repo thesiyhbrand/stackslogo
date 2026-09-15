@@ -92,13 +92,15 @@ export default function StackBuilder({
       settings
     );
 
-  const stackApiUrl =
-    createStackApiUrl(
-      selected,
-      settings
-    );
+  const stackApiUrl = createStackApiUrl(
+    selected,
+    settings,
+    typeof window !== "undefined"
+      ? window.location.origin
+      : ""
+  );
 
-  
+
 
   const origin = typeof window !== "undefined" ? window.location.origin : "";
 
@@ -178,30 +180,30 @@ export default function StackBuilder({
   }
 
   function copyText(
-  value: string,
-  type: "url" | "markdown"
-) {
-  navigator.clipboard.writeText(value);
+    value: string,
+    type: "url" | "markdown"
+  ) {
+    navigator.clipboard.writeText(value);
 
-  if (type === "url") {
-    setCopiedUrl(true);
+    if (type === "url") {
+      setCopiedUrl(true);
 
-    window.setTimeout(() => {
-      setCopiedUrl(false);
-    }, 1500);
+      window.setTimeout(() => {
+        setCopiedUrl(false);
+      }, 1500);
+    }
+
+    if (type === "markdown") {
+      setCopiedMarkdown(true);
+
+      window.setTimeout(() => {
+        setCopiedMarkdown(false);
+      }, 1500);
+    }
   }
-
-  if (type === "markdown") {
-    setCopiedMarkdown(true);
-
-    window.setTimeout(() => {
-      setCopiedMarkdown(false);
-    }, 1500);
-  }
-}
 
   return (
-    <section className="builder">
+    <section id="stack-builder" className="builder">
       {/* HEADER */}
 
       <div className="builder-header">
@@ -322,7 +324,12 @@ export default function StackBuilder({
 
           <div className="setting-row">
             <div className="setting-info">
-              <strong>Size</strong>
+              <label>
+                Size
+                <span className="setting-description">
+                  Control icon size
+                </span>
+              </label>
 
               <span>
                 Icon size in pixels.
@@ -519,27 +526,37 @@ export default function StackBuilder({
         {/* SVG URL */}
 
         <div className="output-url">
-          <code>
-            {stackApiUrl}
-          </code>
+          <code>{stackApiUrl}</code>
 
-          <button
-            type="button"
-            onClick={() =>
-              copyText(stackApiUrl, "url")
-            }
-          >
-            {copiedUrl
-              ? "Copied!"
-              : "Copy URL"}
-          </button>
+          <div className="output-url-actions">
+            <a
+              href={stackApiUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="output-open"
+            >
+              Open
+            </a>
+
+            <button
+              type="button"
+              onClick={() => copyText(stackApiUrl, "url")}
+            >
+              {copiedUrl ? "Copied!" : "Copy"}
+            </button>
+          </div>
         </div>
 
         {/* MARKDOWN */}
 
         <div className="output-code-block">
           <div className="output-code-header">
-            <span>Markdown</span>
+            <div>
+              <strong>Markdown</strong>
+              <span className="output-label-description">
+                Paste this directly into your GitHub README
+              </span>
+            </div>
 
             <button
               type="button"

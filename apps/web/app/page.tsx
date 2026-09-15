@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { icons } from "@devicons/icons";
 
 import BuilderApp from "../components/BuilderApp";
@@ -9,12 +10,12 @@ export default function Home() {
 
       <header className="site-header">
         <div className="site-header-inner">
-          <a
+          <Link
             href="/"
             className="site-logo"
           >
             DEVICONS
-          </a>
+          </Link>
 
           <nav className="site-nav">
             <a href="#builder">
